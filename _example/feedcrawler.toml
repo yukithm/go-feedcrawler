@@ -1,0 +1,15 @@
+[feedcrawler]
+state_file = "feedcrawler_state.json"
+workers = 3
+
+[feed]
+
+  [feed.foo]
+  uri = "http://localhost:8080/foo.rss"
+  title_filter = "release"
+
+  [feed.github_all]
+  uri = "https://github.com/blog/all.atom"
+
+  [feed.google_api_client_gem]
+  uri = "https://rubygems.org/gems/google-api-client/versions.atom"
