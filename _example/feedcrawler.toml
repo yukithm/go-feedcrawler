@@ -4,9 +4,13 @@ workers = 3
 
 [feed]
 
-  [feed.foo]
+  [feed.foo_version]
   uri = "http://localhost:8080/foo.rss"
   title_filter = "release"
+
+  [feed.foo_about]
+  uri = "http://localhost:8080/foo.atom"
+  title_filter = "(?i:about)"
 
   [feed.github_all]
   uri = "https://github.com/blog/all.atom"
