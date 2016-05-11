@@ -1,8 +1,25 @@
+# Configuration file for feedcrawler.
+#
+# TOML format
+# See https://github.com/toml-lang/toml
+
+# Crawler's setting
 [feedcrawler]
+# Persistent state file
 state_file = "feedcrawler_state.json"
+
+# Number of crawler workers
 workers = 3
 
+# Feeds
 [feed]
+  # [feed.<id>] # id = your favorite unique name for the feed
+  # uri                = feed uri
+  # title_filter       = regexp pattern for the entry title
+  # description_filter = regexp pattern for the entry description
+  # content_filter     = regexp pattern for the entry content
+  # author_filter      = regexp pattern for the entry author (name and email)
+  # category_filter    = regexp pattern for the entry category
 
   [feed.foo_version]
   uri = "http://localhost:8080/foo.rss"
