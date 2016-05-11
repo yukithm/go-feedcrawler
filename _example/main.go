@@ -12,7 +12,7 @@ import (
 
 const configFile = "feedcrawler.toml"
 
-var outputTemplate = `[{{.Feed.Title}}]
+var outputTemplate = `[{{.Feed.Title}} ({{.Subscription.URI}})]
 {{range .NewItems}}{{.Title}} ({{.Link}})
 {{end}}
 `
@@ -115,7 +115,7 @@ func newFilter(id, name, filter string) (*regexp.Regexp, error) {
 
 	re, err := regexp.Compile(filter)
 	if err != nil {
-		return nil, fmt.Errorf("feed.%s: Invalid %s_filter regexp: %s", id, name, err.Error())
+		return nil, fmt.Errorf("feed.%s: Invalid %s_filter: %s", id, name, err.Error())
 	}
 
 	return re, nil
