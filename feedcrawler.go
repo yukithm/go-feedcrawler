@@ -122,7 +122,8 @@ func (fc *Crawler) selectNewItems(s Subscription, feed *gofeed.Feed) []*gofeed.I
 
 	var newItems []*gofeed.Item
 	for _, item := range feed.Items {
-		if item.UpdatedParsed.Before(updatedAt) || fc.filtered(s, item) {
+		published := latestTime(item.PublishedParsed, item.UpdatedParsed)
+		if published.Before(updatedAt) || published.Equal(updatedAt) || fc.filtered(s, item) {
 			continue
 		}
 		newItems = append(newItems, item)
@@ -190,9 +191,25 @@ func (fc *Crawler) updateState(result Result) {
 	}
 
 	st.CrawledAt = time.Now()
-	if result.Err == nil && result.Feed != nil && result.Feed.UpdatedParsed != nil {
-		st.UpdatedAt = (*result.Feed.UpdatedParsed).Local()
+	if result.Err == nil && result.Feed != nil {
+		published := latestTime(result.Feed.PublishedParsed, result.Feed.UpdatedParsed)
+		if published != nil {
+			st.UpdatedAt = published.Local()
+		}
 	}
+}
+
+func latestTime(a, b *time.Time) *time.Time {
+	if a == nil {
+		return b
+	} else if b == nil {
+		return a
+	}
+
+	if a.After(*b) {
+		return a
+	}
+	return b
 }
 
 func (fc *Crawler) loadState() error {
