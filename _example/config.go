@@ -8,23 +8,15 @@ import (
 
 	"github.com/kardianos/osext"
 	"github.com/naoina/toml"
+	"github.com/yukithm/go-feedcrawler"
 )
-
-type Feed struct {
-	URI               string `toml:"uri"`
-	TitleFilter       string `toml:"title_filter,omitempty"`
-	DescriptionFilter string `toml:"description_filter,omitempty"`
-	ContentFilter     string `toml:"content_filter,omitempty"`
-	AuthorFilter      string `toml:"author_filter,omitempty"`
-	CategoryFilter    string `toml:"category_filter,omitempty"`
-}
 
 type Config struct {
 	FeedCrawler struct {
 		StateFile  string `toml:"state_file,omitempty"`
 		NumWorkers int    `toml:"workers,omitempty"`
 	} `toml:"feedcrawler"`
-	Feed map[string]Feed
+	Feed feedcrawler.Feeds
 }
 
 func loadConfig() (Config, error) {

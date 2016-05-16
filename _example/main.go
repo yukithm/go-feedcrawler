@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"text/template"
 
 	"github.com/yukithm/go-feedcrawler"
@@ -46,77 +44,11 @@ func newFeedCrawler(config Config) (feedcrawler.Crawler, error) {
 		NumWorkers: config.FeedCrawler.NumWorkers,
 	}
 
-	subscriptions, err := newSubscriptions(config)
+	subscriptions, err := config.Feed.Subscriptions()
 	if err != nil {
 		return crawler, err
 	}
 	crawler.Subscriptions = subscriptions
 
 	return crawler, nil
-}
-
-func newSubscriptions(config Config) ([]feedcrawler.Subscription, error) {
-	var subscriptions []feedcrawler.Subscription
-
-	for id, feed := range config.Feed {
-		s, err := newSubscription(id, feed)
-		if err != nil {
-			return nil, err
-		}
-		subscriptions = append(subscriptions, s)
-	}
-
-	return subscriptions, nil
-}
-
-func newSubscription(id string, feed Feed) (feedcrawler.Subscription, error) {
-	s := feedcrawler.Subscription{
-		ID:  feedcrawler.FeedID(id),
-		URI: feed.URI,
-	}
-
-	if re, err := newFilter(id, "title", feed.TitleFilter); err != nil {
-		return s, err
-	} else {
-		s.TitleFilter = re
-	}
-
-	if re, err := newFilter(id, "description", feed.DescriptionFilter); err != nil {
-		return s, err
-	} else {
-		s.DescriptionFilter = re
-	}
-
-	if re, err := newFilter(id, "content", feed.ContentFilter); err != nil {
-		return s, err
-	} else {
-		s.ContentFilter = re
-	}
-
-	if re, err := newFilter(id, "author", feed.AuthorFilter); err != nil {
-		return s, err
-	} else {
-		s.AuthorFilter = re
-	}
-
-	if re, err := newFilter(id, "category", feed.CategoryFilter); err != nil {
-		return s, err
-	} else {
-		s.CategoryFilter = re
-	}
-
-	return s, nil
-}
-
-func newFilter(id, name, filter string) (*regexp.Regexp, error) {
-	if filter == "" {
-		return nil, nil
-	}
-
-	re, err := regexp.Compile(filter)
-	if err != nil {
-		return nil, fmt.Errorf("feed.%s: Invalid %s_filter: %s", id, name, err.Error())
-	}
-
-	return re, nil
 }
