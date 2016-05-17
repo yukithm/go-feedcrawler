@@ -23,6 +23,7 @@ type Subscription struct {
 	AuthorFilter      *regexp.Regexp
 	CategoryFilter    *regexp.Regexp
 	Filter            func(*gofeed.Item) bool
+	Meta              interface{}
 }
 
 // Result is a result of a feed crawling.
