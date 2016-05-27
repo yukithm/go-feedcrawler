@@ -44,6 +44,7 @@ var defaultNumWorkers = 3
 // Crawler is a crawler for RSS and Atom feeds.
 type Crawler struct {
 	NumWorkers    int
+	Parser        *gofeed.Parser
 	Subscriptions []Subscription
 	StateFile     string
 	states        map[FeedID]*state
@@ -94,7 +95,13 @@ func (fc *Crawler) CrawlFunc(f func(Result)) error {
 }
 
 func (fc *Crawler) worker(id int, subscriptions <-chan Subscription, result chan<- Result) {
-	fp := gofeed.NewParser()
+	var fp *gofeed.Parser
+	if fc.Parser != nil {
+		fp = fc.Parser
+	} else {
+		fp = gofeed.NewParser()
+	}
+
 	for s := range subscriptions {
 		feed, err := fp.ParseURL(s.URI)
 		if err != nil {
