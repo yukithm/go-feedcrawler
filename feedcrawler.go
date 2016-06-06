@@ -200,11 +200,27 @@ func (fc *Crawler) updateState(result Result) {
 
 	st.CrawledAt = time.Now()
 	if result.Err == nil && result.Feed != nil {
-		published := latestTime(result.Feed.PublishedParsed, result.Feed.UpdatedParsed)
+		published := latestFeedTime(result.Feed)
 		if published != nil {
 			st.UpdatedAt = published.Local()
 		}
 	}
+}
+
+func latestFeedTime(feed *gofeed.Feed) *time.Time {
+	if feed == nil {
+		return nil
+	}
+
+	t := latestTime(feed.PublishedParsed, feed.UpdatedParsed)
+	for _, item := range feed.Items {
+		it := latestTime(item.PublishedParsed, item.UpdatedParsed)
+		if it != nil && (t == nil || it.After(*t)) {
+			t = it
+		}
+	}
+
+	return t
 }
 
 func latestTime(a, b *time.Time) *time.Time {
