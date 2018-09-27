@@ -2,29 +2,15 @@ package feedcrawler
 
 import (
 	"fmt"
+	"io/ioutil"
 	"regexp"
+
+	"github.com/naoina/toml"
 )
-
-// Feeds is a map of Feed.
-type Feeds map[string]Feed
-
-// Subscriptions returns an array of Subscription.
-func (fs Feeds) Subscriptions() ([]Subscription, error) {
-	var subscriptions []Subscription
-
-	for id, feed := range fs {
-		s, err := feed.Subscription(id)
-		if err != nil {
-			return nil, err
-		}
-		subscriptions = append(subscriptions, s)
-	}
-
-	return subscriptions, nil
-}
 
 // Feed is a feed configuration to be subscribed.
 type Feed struct {
+	ID                string `toml:"id"`
 	URI               string `toml:"uri"`
 	TitleFilter       string `toml:"title_filter,omitempty"`
 	DescriptionFilter string `toml:"description_filter,omitempty"`
@@ -34,37 +20,37 @@ type Feed struct {
 }
 
 // Subscription returns a Subscription.
-func (f *Feed) Subscription(id string) (Subscription, error) {
-	s := Subscription{
-		ID:  FeedID(id),
-		URI: f.URI,
+func (f *Feed) Subscription() (Subscription, error) {
+	s := &SimpleSubscription{
+		FeedID:  FeedID(f.ID),
+		FeedURI: f.URI,
 	}
 
-	if re, err := newFilter(id, "title", f.TitleFilter); err != nil {
+	if re, err := newFilter(f.ID, "title", f.TitleFilter); err != nil {
 		return s, err
 	} else {
 		s.TitleFilter = re
 	}
 
-	if re, err := newFilter(id, "description", f.DescriptionFilter); err != nil {
+	if re, err := newFilter(f.ID, "description", f.DescriptionFilter); err != nil {
 		return s, err
 	} else {
 		s.DescriptionFilter = re
 	}
 
-	if re, err := newFilter(id, "content", f.ContentFilter); err != nil {
+	if re, err := newFilter(f.ID, "content", f.ContentFilter); err != nil {
 		return s, err
 	} else {
 		s.ContentFilter = re
 	}
 
-	if re, err := newFilter(id, "author", f.AuthorFilter); err != nil {
+	if re, err := newFilter(f.ID, "author", f.AuthorFilter); err != nil {
 		return s, err
 	} else {
 		s.AuthorFilter = re
 	}
 
-	if re, err := newFilter(id, "category", f.CategoryFilter); err != nil {
+	if re, err := newFilter(f.ID, "category", f.CategoryFilter); err != nil {
 		return s, err
 	} else {
 		s.CategoryFilter = re
@@ -84,4 +70,22 @@ func newFilter(id, name, filter string) (*regexp.Regexp, error) {
 	}
 
 	return re, nil
+}
+
+// LoadFeedsFile loads feeds file.
+func LoadFeedsFile(file string) ([]Feed, error) {
+	buf, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := struct {
+		Feeds []Feed `toml:"feeds"`
+	}{}
+
+	if err := toml.Unmarshal(buf, &cfg); err != nil {
+		return nil, err
+	}
+
+	return cfg.Feeds, nil
 }

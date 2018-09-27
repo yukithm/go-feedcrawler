@@ -1,0 +1,13 @@
+# Configuration file for feedcrawler.
+#
+# TOML format
+# See https://github.com/toml-lang/toml
+
+# Feeds file
+feeds_file = "feeds.toml"
+
+# Persistent states file
+states_file = "feeds_states.json"
+
+# Number of crawler workers
+workers = 3
