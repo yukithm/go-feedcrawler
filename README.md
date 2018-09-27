@@ -8,9 +8,10 @@ Features
 --------
 
 - Support RSS and Atom
+- Filtering entries
+    - Regexp based filter for title, description, content, author and categories
+    - Callback function filter
 - State management (keep published date and detect new entries)
-- Regexp based filter for title, description, content, author and categories
-- Callback function based filter
 - Multiple workers
 
 

@@ -1,0 +1,31 @@
+# Feeds file for feedcrawler.
+#
+# TOML format
+# See https://github.com/toml-lang/toml
+
+# [[feeds]]
+# id                 = your favorite unique name for the feed
+# uri                = feed uri
+# title_filter       = regexp pattern for the entry title
+# description_filter = regexp pattern for the entry description
+# content_filter     = regexp pattern for the entry content
+# author_filter      = regexp pattern for the entry author (name and email)
+# category_filter    = regexp pattern for the entry category
+
+[[feeds]]
+id = "foo_version"
+uri = "http://localhost:8080/foo.rss"
+title_filter = "release"
+
+[[feeds]]
+id = "foo_about"
+uri = "http://localhost:8080/foo.atom"
+title_filter = "(?i:about)"
+
+[[feeds]]
+id = "github_blog_all"
+uri = "https://github.com/blog/all.atom"
+
+[[feeds]]
+id = "docker_blog"
+uri = "https://blog.docker.com/feed/"

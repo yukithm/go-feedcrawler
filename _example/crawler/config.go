@@ -6,39 +6,35 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kardianos/osext"
 	"github.com/naoina/toml"
-	"github.com/yukithm/go-feedcrawler"
 )
 
 type Config struct {
-	FeedCrawler struct {
-		StateFile  string `toml:"state_file,omitempty"`
-		NumWorkers int    `toml:"workers,omitempty"`
-	} `toml:"feedcrawler"`
-	Feed feedcrawler.Feeds
+	FeedsFile  string `toml:"feeds_file"`
+	StatesFile string `toml:"states_file,omitempty"`
+	NumWorkers int    `toml:"workers,omitempty"`
 }
 
-func loadConfig() (Config, error) {
-	file := findConfigFile(configFile)
+func loadConfig(name string) (*Config, error) {
+	file := findConfigFile(name)
 	if file == "" {
-		return Config{}, fmt.Errorf("Cannot find config file: %s", configFile)
+		return nil, fmt.Errorf("Cannot find config file: %s", name)
 	}
 	return loadConfigFile(file)
 }
 
-func loadConfigFile(file string) (Config, error) {
+func loadConfigFile(file string) (*Config, error) {
 	var config Config
 	buf, err := ioutil.ReadFile(file)
 	if err != nil {
-		return config, err
+		return nil, err
 	}
 
 	if err := toml.Unmarshal(buf, &config); err != nil {
-		return config, err
+		return nil, err
 	}
 
-	return config, nil
+	return &config, nil
 }
 
 func findConfigFile(filename string) string {
@@ -51,7 +47,7 @@ func findConfigFile(filename string) string {
 	}
 
 	// executable directory
-	if dir, err := osext.ExecutableFolder(); err == nil {
+	if dir, err := executableDir(); err == nil {
 		file := filepath.Join(dir, filename)
 		if fileExists(file) {
 			return file
@@ -66,4 +62,12 @@ func fileExists(file string) bool {
 		return false
 	}
 	return true
+}
+
+func executableDir() (string, error) {
+	file, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Dir(file), nil
 }
