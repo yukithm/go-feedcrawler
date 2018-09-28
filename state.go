@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"time"
 )
@@ -66,20 +65,31 @@ func LoadStatesFile(file string) (States, error) {
 	return LoadStates(f)
 }
 
+// SaveStates writes current states to io.Writer.
+func SaveStates(states States, w io.Writer) error {
+	buf, err := json.MarshalIndent(states, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	n, e := w.Write(buf)
+	if e == nil && n < len(buf) {
+		err = io.ErrShortWrite
+	}
+	return err
+}
+
 // SaveStatesFile save current states into JSON file.
 func SaveStatesFile(states States, file string) error {
 	if file == "" {
 		return errors.New("Invalid state file path")
 	}
 
-	buf, err := json.MarshalIndent(states, "", "  ")
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	if err := ioutil.WriteFile(file, buf, 0666); err != nil {
-		return err
-	}
-
-	return nil
+	return SaveStates(states, f)
 }
