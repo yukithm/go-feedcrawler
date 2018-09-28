@@ -1,9 +1,10 @@
 package feedcrawler
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 )
@@ -36,28 +37,54 @@ func (s States) UpdateState(result Result) {
 	}
 }
 
-// LoadStatesFile loads states JSON file.
-func LoadStatesFile(file string) (States, error) {
-	if file == "" {
-		return nil, errors.New("Invalid state file path")
-	}
-
+// LoadStates loads states from io.Reader.
+func LoadStates(r io.Reader) (States, error) {
 	states := make(States, 0)
-	f, err := os.Open(file)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return states, nil
-		}
-		return nil, err
-	}
-	defer f.Close()
 
-	decoder := json.NewDecoder(f)
+	var buf bytes.Buffer
+	n, e := buf.ReadFrom(r)
+	if e == nil && n == 0 {
+		return states, nil
+	}
+
+	decoder := json.NewDecoder(&buf)
 	if err := decoder.Decode(&states); err != nil {
 		return nil, err
 	}
 
 	return states, nil
+}
+
+// LoadStatesFile loads states from JSON file.
+func LoadStatesFile(file string) (States, error) {
+	if file == "" {
+		return nil, errors.New("Invalid state file path")
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return make(States, 0), nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+
+	return LoadStates(f)
+}
+
+// SaveStates writes current states to io.Writer.
+func SaveStates(states States, w io.Writer) error {
+	buf, err := json.MarshalIndent(states, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	n, e := w.Write(buf)
+	if e == nil && n < len(buf) {
+		err = io.ErrShortWrite
+	}
+	return err
 }
 
 // SaveStatesFile save current states into JSON file.
@@ -66,14 +93,11 @@ func SaveStatesFile(states States, file string) error {
 		return errors.New("Invalid state file path")
 	}
 
-	buf, err := json.MarshalIndent(states, "", "  ")
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	if err := ioutil.WriteFile(file, buf, 0666); err != nil {
-		return err
-	}
-
-	return nil
+	return SaveStates(states, f)
 }

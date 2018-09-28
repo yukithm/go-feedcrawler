@@ -2,7 +2,9 @@ package feedcrawler
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"regexp"
 
 	"github.com/naoina/toml"
@@ -72,11 +74,15 @@ func newFilter(id, name, filter string) (*regexp.Regexp, error) {
 	return re, nil
 }
 
-// LoadFeedsFile loads feeds file.
-func LoadFeedsFile(file string) ([]Feed, error) {
-	buf, err := ioutil.ReadFile(file)
+// LoadFeeds loads feeds from io.Reader.
+func LoadFeeds(r io.Reader) ([]Feed, error) {
+	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(buf) == 0 {
+		return make([]Feed, 0), nil
 	}
 
 	cfg := struct {
@@ -88,4 +94,15 @@ func LoadFeedsFile(file string) ([]Feed, error) {
 	}
 
 	return cfg.Feeds, nil
+}
+
+// LoadFeedsFile loads feeds from file.
+func LoadFeedsFile(file string) ([]Feed, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return LoadFeeds(f)
 }
