@@ -3,6 +3,7 @@ package feedcrawler
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"time"
@@ -36,28 +37,33 @@ func (s States) UpdateState(result Result) {
 	}
 }
 
-// LoadStatesFile loads states JSON file.
-func LoadStatesFile(file string) (States, error) {
-	if file == "" {
-		return nil, errors.New("Invalid state file path")
-	}
-
+// LoadStates loads states from io.Reader.
+func LoadStates(r io.Reader) (States, error) {
 	states := make(States, 0)
-	f, err := os.Open(file)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return states, nil
-		}
-		return nil, err
-	}
-	defer f.Close()
-
-	decoder := json.NewDecoder(f)
+	decoder := json.NewDecoder(r)
 	if err := decoder.Decode(&states); err != nil {
 		return nil, err
 	}
 
 	return states, nil
+}
+
+// LoadStatesFile loads states from JSON file.
+func LoadStatesFile(file string) (States, error) {
+	if file == "" {
+		return nil, errors.New("Invalid state file path")
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return make(States, 0), nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+
+	return LoadStates(f)
 }
 
 // SaveStatesFile save current states into JSON file.
