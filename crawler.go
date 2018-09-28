@@ -76,6 +76,7 @@ func (fc *Crawler) worker(id int, subscriptions <-chan Subscription, results cha
 		fp = fc.Parser
 	} else {
 		fp = gofeed.NewParser()
+		fp.AtomTranslator = NewEnhancedAtomTranslator()
 	}
 
 	for s := range subscriptions {

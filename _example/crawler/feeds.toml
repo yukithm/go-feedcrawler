@@ -29,3 +29,7 @@ uri = "https://github.com/blog/all.atom"
 [[feeds]]
 id = "docker_blog"
 uri = "https://blog.docker.com/feed/"
+
+[[feeds]]
+id = "glang_blog"
+uri = "https://blog.golang.org/feed.atom"
