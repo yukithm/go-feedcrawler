@@ -81,6 +81,10 @@ func LoadFeeds(r io.Reader) ([]Feed, error) {
 		return nil, err
 	}
 
+	if len(buf) == 0 {
+		return make([]Feed, 0), nil
+	}
+
 	cfg := struct {
 		Feeds []Feed `toml:"feeds"`
 	}{}

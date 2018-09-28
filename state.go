@@ -1,6 +1,7 @@
 package feedcrawler
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -39,7 +40,14 @@ func (s States) UpdateState(result Result) {
 // LoadStates loads states from io.Reader.
 func LoadStates(r io.Reader) (States, error) {
 	states := make(States, 0)
-	decoder := json.NewDecoder(r)
+
+	var buf bytes.Buffer
+	n, e := buf.ReadFrom(r)
+	if e == nil && n == 0 {
+		return states, nil
+	}
+
+	decoder := json.NewDecoder(&buf)
 	if err := decoder.Decode(&states); err != nil {
 		return nil, err
 	}
