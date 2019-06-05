@@ -18,7 +18,7 @@ Features
 Examples
 --------
 
-See `_example` directory.
+See `_examples` directory.
 
 - TOML based configuration file
 - Fake feed server (dynamic entries feed)
@@ -27,7 +27,7 @@ See `_example` directory.
 TODO
 ----
 
-- Suppor local files (local path and/or file scheme such as "file://")
+- Support local files (local path and/or file scheme such as "file://")
 
 
 License
